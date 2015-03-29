@@ -1,10 +1,6 @@
 package autoschools.kh.ua.autosched;
 
-import android.util.Log;
-import android.widget.Toast;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 public final class ScheduleUtils {
@@ -68,7 +64,6 @@ public final class ScheduleUtils {
             return new String[]{"Ошибка сервера"};
         }
     }
-
 
 
     // ============== PRACTICE METHODS ================= //

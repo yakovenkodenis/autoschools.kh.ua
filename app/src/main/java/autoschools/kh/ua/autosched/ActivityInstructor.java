@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,8 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-public class ActivityInstructor extends Activity
-{
+public class ActivityInstructor extends Activity {
     String[] myItems;
     String[] descriptions;
     int[] images;
@@ -43,14 +41,11 @@ public class ActivityInstructor extends Activity
         super.onCreate(savedInstanceState);
 
 
-        if(ReadFile().contains("logged_in_instructor")) {
+        if (ReadFile().contains("logged_in_instructor")) {
             setContentView(R.layout.instructor_activity);
 
             arr = ScheduleUtils.GetInstructorScheduleArray(ReadSchedulePracticeFromFile());
 
-//            Resources res = getResources();
-//            myItems = res.getStringArray(R.array.titles);
-//            descriptions = res.getStringArray(R.array.descriptions_practice);
 
             ListView lstPractice = (ListView) findViewById(R.id.listView);
 
@@ -83,8 +78,7 @@ public class ActivityInstructor extends Activity
             });
 
             lstPractice.setAdapter(new MyListViewAdapter_Instructor(getApplicationContext(), myItems, images, descriptions));
-        }
-        else{
+        } else {
             finish();
             startActivity(new Intent(ActivityInstructor.this, LoginActivity.class));
         }
@@ -132,18 +126,16 @@ public class ActivityInstructor extends Activity
         }
     }
 
-    public String ReadFile()
-    {
-        try{
+    public String ReadFile() {
+        try {
             InputStream in = openFileInput("is_logged_in");
-            if(in != null)
-            {
+            if (in != null) {
                 InputStreamReader reader = new InputStreamReader(in);
                 BufferedReader bufferedReader = new BufferedReader(reader);
 
                 StringBuilder builder = new StringBuilder();
                 String str;
-                while((str = bufferedReader.readLine()) != null)
+                while ((str = bufferedReader.readLine()) != null)
                     builder.append(str);
                 in.close();
                 Log.d("ReadFile", builder.toString());
@@ -151,17 +143,17 @@ public class ActivityInstructor extends Activity
             }
             return "logged_out";
 
-        } catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             return "logged_out";
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return "logged_out";
         }
     }
-    void WriteFile(String is_logged_in)
-    {
-        try{
+
+    void WriteFile(String is_logged_in) {
+        try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
                     (openFileOutput("is_logged_in", MODE_PRIVATE)));
 
@@ -169,12 +161,13 @@ public class ActivityInstructor extends Activity
             Log.d("WriteFile", "файлы записаны");
 
             bw.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private Menu optionsMenu;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -187,14 +180,11 @@ public class ActivityInstructor extends Activity
         return super.onCreateOptionsMenu(menu);
     }
 
-    public void setRefreshActionButtonState(final boolean refreshing)
-    {
-        if(optionsMenu != null)
-        {
+    public void setRefreshActionButtonState(final boolean refreshing) {
+        if (optionsMenu != null) {
             final MenuItem refreshItem = optionsMenu.findItem(R.id.update);
-            if(refreshItem != null)
-            {
-                if(refreshing)
+            if (refreshItem != null) {
+                if (refreshing)
                     refreshItem.setActionView(R.layout.update_intermediate_progress);
                 else refreshItem.setActionView(null);
             }
@@ -207,7 +197,7 @@ public class ActivityInstructor extends Activity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch(id) {
+        switch (id) {
             case R.id.site:
                 return true;
             case R.id.update:

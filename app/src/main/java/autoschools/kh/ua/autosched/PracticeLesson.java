@@ -1,5 +1,6 @@
 package autoschools.kh.ua.autosched;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.GregorianCalendar;
@@ -14,8 +15,7 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
     public String finish_date_time;
 
     public PracticeLesson(String student, String teacher, String meet_point,
-                        String start_date_time, String finish_date_time)
-    {
+                          String start_date_time, String finish_date_time) {
         this.student = student;
         this.teacher = teacher;
         this.meet_point = meet_point;
@@ -23,7 +23,7 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
         this.finish_date_time = finish_date_time;
     }
 
-    public String toDescriptionString(){
+    public String toDescriptionString() {
         String res =
                 "Дата: " + getDay() + "\n" +
                         "Начало: " + getStartTime() + "\n" +
@@ -47,7 +47,7 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
         return res;
     }
 
-    public String toShortDescriptionString(){
+    public String toShortDescriptionString() {
         String res =
                 getDay() + "\n" +
                         "Начало: " + getStartTime() + "\n" +
@@ -56,18 +56,18 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
         return res;
     }
 
-    public String toTypeString(){
+    public String toTypeString() {
         return "Тип занятия: Практика";
     }
 
-    public String getDay(){
+    public String getDay() {
 //        String res = start_date_time.split("-")[0];
 //        Log.wtf("THEORY LESSON CLASS getDay()", res);
 //        return res;
         StringBuilder sb = new StringBuilder();
         char[] arr = start_date_time.toCharArray();
-        for(char t : arr) {
-            if(t == '-') {
+        for (char t : arr) {
+            if (t == '-') {
                 break;
             }
             sb.append(t);
@@ -75,14 +75,14 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
         return sb.toString();
     }
 
-    public String getStartTime(){
+    public String getStartTime() {
 //        String res = start_date_time.split("-")[1];
 //        Log.wtf("THEORY LESSON CLASS getStartTime()", res);
 //        return res;
         return getTime(start_date_time);
     }
 
-    public String getFinishTime(){
+    public String getFinishTime() {
 //        String res = finish_date_time.split("-")[1];
 //        Log.wtf("THEORY LESSON CLASS getFinishTime()", res);
 //        return res;
@@ -99,10 +99,10 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
         int countColons = 0;
         for (char t : charArray) {
             if (blt) {
-                if(t == ':') {
+                if (t == ':') {
                     countColons++;
                 }
-                if(countColons == 2) {
+                if (countColons == 2) {
                     break;
                 }
                 sb.append(t);
@@ -116,8 +116,8 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
 
 
     @Override
-    public int compareTo(PracticeLesson t) {
-        if(getDay() == null || getStartTime() == null
+    public int compareTo(@NonNull PracticeLesson t) {
+        if (getDay() == null || getStartTime() == null
                 || t.getDay() == null || t.getStartTime() == null) {
             return 0;
         } else {
@@ -133,7 +133,7 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
                     Integer.parseInt(t1[0]), Integer.parseInt(t1[1]));
             GregorianCalendar calendar2 = new GregorianCalendar(Integer.parseInt(d2[2]),
                     Integer.parseInt(d2[0]), Integer.parseInt(d2[1]),
-                    Integer.parseInt(t2[0]),Integer.parseInt(t2[1]));
+                    Integer.parseInt(t2[0]), Integer.parseInt(t2[1]));
 
             return calendar1.compareTo(calendar2);
         }

@@ -1,5 +1,6 @@
 package autoschools.kh.ua.autosched;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.GregorianCalendar;
@@ -103,7 +104,7 @@ public class TheoryLesson implements Comparable<TheoryLesson> {
     }
 
     @Override
-    public int compareTo(TheoryLesson t) {
+    public int compareTo(@NonNull TheoryLesson t) {
         if(getDay() == null || getStartTime() == null
                 || t.getDay() == null || t.getStartTime() == null) {
             return 0;

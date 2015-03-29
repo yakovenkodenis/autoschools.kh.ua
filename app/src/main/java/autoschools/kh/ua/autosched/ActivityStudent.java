@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -53,9 +52,9 @@ public class ActivityStudent extends FragmentActivity
 
 
                 Bundle extras = getIntent().getExtras();
-                String schedule_theory = extras != null
-                        ? extras.getString("theory_schedule")
-                        : "none";
+//                String schedule_theory = extras != null
+//                        ? extras.getString("theory_schedule")
+//                        : "none";
                 if(extras != null) {
                     mPassword = extras.getString("password");
                     mLogin = extras.getString("login");

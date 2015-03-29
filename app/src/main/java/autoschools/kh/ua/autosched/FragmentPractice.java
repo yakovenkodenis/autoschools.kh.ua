@@ -3,7 +3,6 @@ package autoschools.kh.ua.autosched;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextClock;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -25,8 +23,6 @@ import java.util.ArrayList;
 
 
 public class FragmentPractice extends Fragment {
-    private ListView list_practice;
-    private TextClock textClock;
 
     String[] myItems;
     String[] descriptions;
@@ -39,7 +35,7 @@ public class FragmentPractice extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_practice, container, false);
 
-        list_practice = (ListView) view.findViewById(R.id.list_practice);
+        ListView list_practice = (ListView) view.findViewById(R.id.list_practice);
 
         arr = ScheduleUtils.GetPracticeArray(ReadSchedulePracticeFromFile());
 
