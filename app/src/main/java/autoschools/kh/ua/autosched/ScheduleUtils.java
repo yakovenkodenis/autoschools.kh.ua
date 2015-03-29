@@ -11,6 +11,8 @@ public final class ScheduleUtils {
 
     // -----------PARSE CSV-------------------//
 
+
+    // ============== THEORY METHODS ================= //
     public static ArrayList<TheoryLesson> GetTheoryArray(String s) {
 
         ArrayList<TheoryLesson> res = new ArrayList<>();
@@ -29,7 +31,7 @@ public final class ScheduleUtils {
         return res;
     }
 
-    public static String[] getShortDescriptions(ArrayList<TheoryLesson> arr) {
+    public static String[] getShortTheoryDescriptions(ArrayList<TheoryLesson> arr) {
         String[] desc = new String[arr.size()];
         for (int i = 0; i < desc.length; ++i) {
             desc[i] = arr.get(i).toShortDescriptionString();
@@ -37,7 +39,7 @@ public final class ScheduleUtils {
         return desc;
     }
 
-    public static String[] getLongDescriptions(ArrayList<TheoryLesson> arr) {
+    public static String[] getLongTheoryDescriptions(ArrayList<TheoryLesson> arr) {
         try {
             String[] desc = new String[arr.size()];
             for (int i = 0; i < arr.size(); ++i) {
@@ -50,7 +52,68 @@ public final class ScheduleUtils {
         }
     }
 
-    public static String[] getTitles(ArrayList<TheoryLesson> arr) {
+    public static String[] getTheoryTitles(ArrayList<TheoryLesson> arr) {
+        try {
+            if (arr != null) {
+                String[] titles = new String[arr.size()];
+                for (int i = 0; i < arr.size(); ++i) {
+                    titles[i] = "Занятие " + (i + 1);
+                }
+                return titles;
+            } else {
+                return new String[]{"Ошибка сервера"};
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new String[]{"Ошибка сервера"};
+        }
+    }
+
+
+
+    // ============== PRACTICE METHODS ================= //
+
+
+    public static ArrayList<PracticeLesson> GetPracticeArray(String s) {
+
+        ArrayList<PracticeLesson> res = new ArrayList<>();
+        s = s.substring(0, s.length() - 2);
+        String[] split = s.split(";");
+
+        String[] t = new String[5];
+        for (int i = 0, j = 0; i < split.length; ++i, ++j) {
+            t[j] = split[i];
+            if (j == 4) {
+                res.add(new PracticeLesson(t[1], t[0], t[2], t[3], t[4]));
+                j = -1;
+            }
+        }
+        Collections.sort(res);
+        return res;
+    }
+
+    public static String[] getShortPracticeDescriptions(ArrayList<PracticeLesson> arr) {
+        String[] desc = new String[arr.size()];
+        for (int i = 0; i < desc.length; ++i) {
+            desc[i] = arr.get(i).toShortDescriptionString();
+        }
+        return desc;
+    }
+
+    public static String[] getLongPracticeDescriptions(ArrayList<PracticeLesson> arr) {
+        try {
+            String[] desc = new String[arr.size()];
+            for (int i = 0; i < arr.size(); ++i) {
+                desc[i] = arr.get(i).toDescriptionString();
+            }
+            return desc;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new String[]{new PracticeLesson("error-error", "error-error", "error-error", "error-error", "error-error").toDescriptionString()};
+        }
+    }
+
+    public static String[] getPracticeTitles(ArrayList<PracticeLesson> arr) {
         try {
             if (arr != null) {
                 String[] titles = new String[arr.size()];

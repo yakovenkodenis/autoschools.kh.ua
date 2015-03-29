@@ -7,12 +7,21 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextClock;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 
 public class FragmentPractice extends Fragment {
@@ -23,31 +32,46 @@ public class FragmentPractice extends Fragment {
     String[] descriptions;
     int[] images;
 
+    ArrayList<PracticeLesson> arr;
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_practice, container, false);
 
         list_practice = (ListView) view.findViewById(R.id.list_practice);
-        //textClock = (TextClock) getView().findViewById(R.id.textClock);
-        //textClock.setTimeZone("Europe/Kiev");
 
-        Resources res = getResources();
-        myItems = res.getStringArray(R.array.titles);
-        descriptions = res.getStringArray(R.array.descriptions_practice);
-//        images = new int[]{R.drawable.lecture_icon, R.drawable.car_icon, R.drawable.lecture_icon, R.drawable.car_icon,
-//                R.drawable.lecture_icon, R.drawable.car_icon, R.drawable.lecture_icon, R.drawable.car_icon,
-//                R.drawable.lecture_icon, R.drawable.car_icon, R.drawable.lecture_icon, R.drawable.car_icon,
-//                R.drawable.lecture_icon, R.drawable.car_icon, R.drawable.lecture_icon, R.drawable.car_icon};
+        arr = ScheduleUtils.GetPracticeArray(ReadSchedulePracticeFromFile());
 
-        //int[] images = {R.drawable.lecture_icon, R.drawable.car_icon};
+        try {
+            myItems = ScheduleUtils.getPracticeTitles(arr);
+            descriptions = ScheduleUtils.getShortPracticeDescriptions(arr);
+        } catch (Throwable e) {
 
-        //timer = new Timer();
+
+            //TODO debug
+            StackTraceElement[] st = e.getStackTrace();
+            StringBuilder sb = new StringBuilder();
+            for (StackTraceElement s : st) {
+                sb.append(s.toString()).append("\n");
+            }
+            Log.wtf("FRAGMENT PRACTICE CLASS onCreateView()", sb.toString());
+
+
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "Ошибка подключения FRAGMENT PRACTICE CLASS", Toast.LENGTH_SHORT).show();
+        }
+
+
+//        Resources res = getResources();
+//        myItems = res.getStringArray(R.array.titles);
+//        descriptions = res.getStringArray(R.array.descriptions_practice);
+
 
         list_practice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                ShowAlert(view.getContext());
+                ShowAlert(view.getContext(), i);
             }
         });
 
@@ -57,11 +81,11 @@ public class FragmentPractice extends Fragment {
         return view;
     }
 
-    public void ShowAlert(Context c) {
+    public void ShowAlert(Context c, int i) {
+        String[] desc = ScheduleUtils.getLongPracticeDescriptions(arr);
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Информация о занятии")
-                .setMessage("Имя преподавателя: " + "\t" + "Иванов Пётр Иванович" +
-                        "\n" + "Тип занятия: " + "\t" + "Практика")
+                .setMessage(desc[i])
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -70,6 +94,33 @@ public class FragmentPractice extends Fragment {
                 });
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+
+    String ReadSchedulePracticeFromFile() {
+        try {
+            InputStream in = getActivity().openFileInput("schedule_practice");
+            if (in != null) {
+                InputStreamReader reader = new InputStreamReader(in);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+
+                StringBuilder builder = new StringBuilder();
+                String str;
+                while ((str = bufferedReader.readLine()) != null)
+                    builder.append(str);
+                in.close();
+                Log.d("ReadSchedulePracticeFromFile", builder.toString());
+                return builder.toString();
+            }
+            return "none";
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return "none";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "none";
+        }
     }
 }
 

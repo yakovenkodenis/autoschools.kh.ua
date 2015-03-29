@@ -40,8 +40,8 @@ public class FragmentTheory extends Fragment {
         arr = ScheduleUtils.GetTheoryArray(ReadScheduleTheoryFromFile());
 
         try {
-            myItems = ScheduleUtils.getTitles(arr);
-            descriptions = ScheduleUtils.getShortDescriptions(arr);
+            myItems = ScheduleUtils.getTheoryTitles(arr);
+            descriptions = ScheduleUtils.getShortTheoryDescriptions(arr);
         } catch (Throwable e) {
 
 
@@ -76,7 +76,7 @@ public class FragmentTheory extends Fragment {
     }
 
     public void ShowAlert(Context c, int i) {
-        String[] desc = ScheduleUtils.getLongDescriptions(arr);
+        String[] desc = ScheduleUtils.getLongTheoryDescriptions(arr);
         AlertDialog.Builder builder = new AlertDialog.Builder(c);
         builder.setTitle("Информация о занятии")
                 .setMessage(desc[i])

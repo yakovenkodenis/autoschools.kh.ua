@@ -74,6 +74,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             case "logged_in_student":
                 Intent studentActivity = new Intent(LoginActivity.this, ActivityStudent.class);
                 studentActivity.putExtra("theory_schedule", ReadScheduleTheoryFromFile());
+                studentActivity.putExtra("practice_schedule", ReadSchedulePracticeFromFile());
                 LoginActivity.this.startActivity(studentActivity);
                 break;
             case "logged_in_instructor":
@@ -340,6 +341,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         }
     }
 
+    void WriteSchedulePracticeToFile(String schedule_practice) {
+        try{
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
+                    (openFileOutput("schedule_practice", MODE_PRIVATE)));
+
+            bw.write(schedule_practice);
+            Log.d("WriteSchedulePracticeToFile", "файлы записаны");
+
+            bw.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
 
     String ReadScheduleTheoryFromFile(){
         try{
@@ -371,6 +386,36 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         }
     }
 
+    String ReadSchedulePracticeFromFile(){
+        try{
+            InputStream in = openFileInput("schedule_practice");
+            if(in != null)
+            {
+                InputStreamReader reader = new InputStreamReader(in);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+
+                StringBuilder builder = new StringBuilder();
+                String str;
+                while((str = bufferedReader.readLine()) != null)
+                    builder.append(str);
+                in.close();
+                Log.d("ReadSchedulePracticeFromFile", builder.toString());
+                return builder.toString();
+            }
+            return "none";
+
+        } catch(FileNotFoundException e){
+            e.printStackTrace();
+            return "none";
+        } catch(IOException e){
+            e.printStackTrace();
+            return "none";
+        } catch(Throwable e){
+            e.printStackTrace();
+            return "none";
+        }
+    }
+
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -383,6 +428,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
 
         private String UserRole;
         private String theory_schedule;
+        private String practice_schedule;
 
         UserLoginTask(String login, String password) {
             mLogin = login;
@@ -429,6 +475,23 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                 theory_schedule = sched;
 
 
+                uri = ConnectionUtils.GetPracticeScheduleString(mLogin, mPassword);
+                client = new DefaultHttpClient();
+                httpGet = new HttpGet(uri);
+                try {
+                    HttpResponse httpResponse = client.execute(httpGet);
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    sched = EntityUtils.toString(httpEntity, "UTF-8");
+                }catch(ClientProtocolException e){
+                    e.printStackTrace();
+                    return false;
+                } catch(IOException e){
+                    e.printStackTrace();
+                    return false;
+                }
+                practice_schedule = sched;
+
+
                 return true;
             } catch (Throwable e) {
                 return false;
@@ -451,6 +514,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                         finish();
                         WriteFile("logged_in_student");
                         WriteScheduleTheoryToFile(theory_schedule);
+                        WriteSchedulePracticeToFile(practice_schedule);
                         Intent studentActivity = new Intent(LoginActivity.this, ActivityStudent.class);
                         studentActivity.putExtra("login", mLogin);
 
