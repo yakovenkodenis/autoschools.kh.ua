@@ -35,6 +35,18 @@ public class PracticeLesson implements Comparable<PracticeLesson> {
         return res;
     }
 
+    public String toInstructorDescriptionString() {
+        String res =
+                "Дата: " + getDay() + "\n" +
+                        "Начало: " + getStartTime() + "\n" +
+                        "Конец: " + getFinishTime() + "\n" +
+                        "Студент: " + student + "\n" +
+                        "Место встречи: " + meet_point + "\n" +
+                        toTypeString();
+        Log.wtf("PRACTICE LESSON CLASS toInstructorDescriptionString()", res);
+        return res;
+    }
+
     public String toShortDescriptionString(){
         String res =
                 getDay() + "\n" +

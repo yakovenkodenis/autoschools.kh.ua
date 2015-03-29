@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -27,12 +28,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 public class ActivityInstructor extends Activity
 {
     String[] myItems;
     String[] descriptions;
     int[] images;
+
+    ArrayList<PracticeLesson> arr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,16 +46,39 @@ public class ActivityInstructor extends Activity
         if(ReadFile().contains("logged_in_instructor")) {
             setContentView(R.layout.instructor_activity);
 
-            Resources res = getResources();
-            myItems = res.getStringArray(R.array.titles);
-            descriptions = res.getStringArray(R.array.descriptions_practice);
+            arr = ScheduleUtils.GetInstructorScheduleArray(ReadSchedulePracticeFromFile());
+
+//            Resources res = getResources();
+//            myItems = res.getStringArray(R.array.titles);
+//            descriptions = res.getStringArray(R.array.descriptions_practice);
 
             ListView lstPractice = (ListView) findViewById(R.id.listView);
+
+
+            try {
+                myItems = ScheduleUtils.getPracticeTitles(arr);
+                descriptions = ScheduleUtils.getShortPracticeDescriptions(arr);
+            } catch (Throwable e) {
+
+
+                //TODO debug
+                StackTraceElement[] st = e.getStackTrace();
+                StringBuilder sb = new StringBuilder();
+                for (StackTraceElement s : st) {
+                    sb.append(s.toString()).append("\n");
+                }
+                Log.wtf("ACTIVITY INSTRUCTOR CLASS onCreateView()", sb.toString());
+
+
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Ошибка подключения ACTIVITY INSTRUCTOR CLASS", Toast.LENGTH_SHORT).show();
+            }
+
 
             lstPractice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    ShowAlert();
+                    ShowAlert(i);
                 }
             });
 
@@ -60,6 +87,48 @@ public class ActivityInstructor extends Activity
         else{
             finish();
             startActivity(new Intent(ActivityInstructor.this, LoginActivity.class));
+        }
+    }
+
+    public void ShowAlert(int i) {
+        String[] desc = ScheduleUtils.getLongInstructorDescriptions(arr);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityInstructor.this);
+        builder.setTitle("Информация о занятии")
+                .setMessage(desc[i])
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+
+    String ReadSchedulePracticeFromFile() {
+        try {
+            InputStream in = openFileInput("schedule_practice");
+            if (in != null) {
+                InputStreamReader reader = new InputStreamReader(in);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+
+                StringBuilder builder = new StringBuilder();
+                String str;
+                while ((str = bufferedReader.readLine()) != null)
+                    builder.append(str);
+                in.close();
+                Log.d("ReadSchedulePracticeFromFile INSTRUCTOR", builder.toString());
+                return builder.toString();
+            }
+            return "none";
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return "none";
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "none";
         }
     }
 
@@ -103,22 +172,6 @@ public class ActivityInstructor extends Activity
         } catch (IOException e){
             e.printStackTrace();
         }
-    }
-
-
-    public void ShowAlert() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Информация о занятии")
-                .setMessage("Имя студента: " + "\t" + "Иванов Пётр Петрович" +
-                        "\n" + "Тип занятия: " + "\t" + "Практика")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.dismiss();
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
     }
 
     private Menu optionsMenu;

@@ -113,6 +113,19 @@ public final class ScheduleUtils {
         }
     }
 
+    public static String[] getLongInstructorDescriptions(ArrayList<PracticeLesson> arr) {
+        try {
+            String[] desc = new String[arr.size()];
+            for (int i = 0; i < arr.size(); ++i) {
+                desc[i] = arr.get(i).toInstructorDescriptionString();
+            }
+            return desc;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new String[]{new PracticeLesson("error-error", "error-error", "error-error", "error-error", "error-error").toDescriptionString()};
+        }
+    }
+
     public static String[] getPracticeTitles(ArrayList<PracticeLesson> arr) {
         try {
             if (arr != null) {
@@ -128,6 +141,23 @@ public final class ScheduleUtils {
             e.printStackTrace();
             return new String[]{"Ошибка сервера"};
         }
+    }
+
+    public static ArrayList<PracticeLesson> GetInstructorScheduleArray(String s) {
+        ArrayList<PracticeLesson> res = new ArrayList<>();
+        s = s.substring(0, s.length() - 2);
+        String[] split = s.split(";");
+
+        String[] t = new String[5];
+        for (int i = 0, j = 0; i < split.length; ++i, ++j) {
+            t[j] = split[i];
+            if (j == 4) {
+                res.add(new PracticeLesson(t[0], t[1], t[2], t[3], t[4]));
+                j = -1;
+            }
+        }
+        Collections.sort(res);
+        return res;
     }
 }
 
