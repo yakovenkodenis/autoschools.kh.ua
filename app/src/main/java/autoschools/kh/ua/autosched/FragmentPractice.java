@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -19,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 
@@ -30,6 +32,7 @@ public class FragmentPractice extends Fragment {
 
     ArrayList<PracticeLesson> arr;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
@@ -39,9 +42,21 @@ public class FragmentPractice extends Fragment {
 
         arr = ScheduleUtils.GetPracticeArray(ReadSchedulePracticeFromFile());
 
+        TextView timer = (TextView) view.findViewById(R.id.textClock);
+
         try {
             myItems = ScheduleUtils.getPracticeTitles(arr);
             descriptions = ScheduleUtils.getShortPracticeDescriptions(arr);
+
+
+            try {
+                new ScheduleTimer(timer, getActivity())
+                        .main(ScheduleUtils.getPracticeTimes(arr));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+
         } catch (Throwable e) {
 
 

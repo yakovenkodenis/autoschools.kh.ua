@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -19,7 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class FragmentTheory extends Fragment {
 
@@ -27,21 +30,37 @@ public class FragmentTheory extends Fragment {
     String[] descriptions;
     int[] images;
 
+    public static MyListViewAdapter_Theory adapter;
 
     ArrayList<TheoryLesson> arr;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_theory, container, false);
+        final View view = inflater.inflate(R.layout.fragment_theory, container, false);
 
         ListView list_theory = (ListView) view.findViewById(R.id.list_theory);
 
+        final TextView timer = (TextView) view.findViewById(R.id.textClock);
+
         arr = ScheduleUtils.GetTheoryArray(ReadScheduleTheoryFromFile());
+
+        Collections.sort(arr);
+
 
         try {
             myItems = ScheduleUtils.getTheoryTitles(arr);
             descriptions = ScheduleUtils.getShortTheoryDescriptions(arr);
+
+            try {
+                new ScheduleTimer(timer, getActivity())
+                        .main(ScheduleUtils.getTheoryTimes(arr));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+//            new TheoryScheduleTimer(timer).execute(ScheduleUtils.getTimes(arr));
+
         } catch (Throwable e) {
 
 
@@ -67,12 +86,47 @@ public class FragmentTheory extends Fragment {
         });
 
 
-        MyListViewAdapter_Theory adapter = new MyListViewAdapter_Theory(getActivity(),
+        adapter = new MyListViewAdapter_Theory(getActivity(),
                 myItems, images, descriptions);
         list_theory.setAdapter(adapter);
 
 
+
+//        final SimpleDateFormat format = new SimpleDateFormat("HH:mm:SS");
+//        final Time[] times = ScheduleUtils.getTimes(arr);
+
+//        new CountDownTimer(5000, 1000) {
+//            @Override
+//            public void onTick(long millisUntilFinished) {
+//                timer.setText(format.format(millisUntilFinished / 1000));
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                new CountDownTimer(5000, 1000) {
+//                    @Override
+//                    public void onTick(long millisUntilFinished) {
+//                        timer.setText(format.format(millisUntilFinished / 1000));
+//                    }
+//
+//                    @Override
+//                    public void onFinish() {
+//                          timer.setText("hey");
+//                    }
+//                }.start();
+//            }
+//        }.start();
+
         return view;
+    }
+
+
+    public void updateTheory() {
+//        ArrayList<TheoryLesson> arr = ScheduleUtils.GetTheoryArray(ReadScheduleTheoryFromFile());
+//        adapter.descriptionArray = ScheduleUtils.getShortTheoryDescriptions(arr);
+//        adapter.titleArray = ScheduleUtils.getTheoryTitles(arr);
+//        adapter.images = images;
+        adapter.notifyDataSetChanged();
     }
 
     public void ShowAlert(Context c, int i) {
@@ -89,6 +143,7 @@ public class FragmentTheory extends Fragment {
         AlertDialog alert = builder.create();
         alert.show();
     }
+
 
     String ReadScheduleTheoryFromFile() {
         try {
@@ -113,7 +168,13 @@ public class FragmentTheory extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
             return "none";
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return "none";
         }
     }
+
+    /// ================ TIMER ================= ///
+
 }
 

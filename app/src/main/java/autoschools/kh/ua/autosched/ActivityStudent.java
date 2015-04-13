@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -38,6 +41,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Locale;
+
 
 
 public class ActivityStudent extends FragmentActivity
@@ -93,13 +97,26 @@ public class ActivityStudent extends FragmentActivity
     // Update the page
     private void Reload()
     {
-        Intent i = getIntent();
-        i.putExtra("theory_schedule", schedule);
-        overridePendingTransition(0, 0);
-        i.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        finish();
-        overridePendingTransition(0, 0);
-        startActivity(i);
+//        Intent i = getIntent();
+//        i.putExtra("theory_schedule", schedule);
+//        overridePendingTransition(0, 0);
+//        i.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+//        finish();
+//        overridePendingTransition(0, 0);
+//        startActivity(i);
+
+        if (Build.VERSION.SDK_INT >= 11) {
+            recreate();
+        } else {
+            Intent intent = getIntent();
+            intent.putExtra("theory_schedule", schedule);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            finish();
+            overridePendingTransition(0, 0);
+
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+        }
     }
 
 
@@ -141,6 +158,20 @@ public class ActivityStudent extends FragmentActivity
 //        }
 //    }
 
+    private void showInfoDialog(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityStudent.this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -149,10 +180,18 @@ public class ActivityStudent extends FragmentActivity
         int id = item.getItemId();
         switch(id) {
             case R.id.site:
+                String url = "http://www.autoschools.kh.ua";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
                 return true;
             case R.id.update: {
                 setRefreshActionButtonState(true);
                 new UpdateTheoryAsync(item).execute();
+                // TODO WRITE SCHEDULE THEORY TO FILE
+                getHttpResponse();
+                new FragmentTheory().updateTheory();
+
                 return true;
             }
             case R.id.logout: {
@@ -179,9 +218,25 @@ public class ActivityStudent extends FragmentActivity
 
                 return true;
             }
-
+            case R.id.aboutAuthors:
+                showInfoDialog("Об авторах", getResources().getString(R.string.authors_help));
+                return true;
+            case R.id.help:
+                showInfoDialog("Помощь", getResources().getString(R.string.menu_help));
+                return true;
+            case R.id.aboutProject:
+                showInfoDialog("О проекте", getResources().getString(R.string.about_help));
+                return true;
+            case R.id.contacts:
+                showInfoDialog("Обратная связь", getResources().getString(R.string.feedback_help));
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    void getHttpResponse() {
+        UserLoginTask task = new UserLoginTask(mLogin, mPassword);
+        task.execute();
     }
 
     public String ReadFile()
@@ -269,6 +324,277 @@ public class ActivityStudent extends FragmentActivity
             Reload();
         }
     }
+
+
+    void WriteScheduleTheoryToFile(String schedule_theory){
+        try{
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
+                    (openFileOutput("schedule_theory", MODE_PRIVATE)));
+
+            bw.write(schedule_theory);
+            Log.d("WriteScheduleTheoryToFile", "файлы записаны");
+
+            bw.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    void WriteSchedulePracticeToFile(String schedule_practice) {
+        try{
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
+                    (openFileOutput("schedule_practice", MODE_PRIVATE)));
+
+            bw.write(schedule_practice);
+            Log.d("WriteSchedulePracticeToFile", "файлы записаны");
+
+            bw.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+
+
+//    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+//
+//        private final String mLogin;
+//        private final String mPassword;
+//
+//        private String UserRole;
+//        private String theory_schedule;
+//        private String practice_schedule;
+//
+//        UserLoginTask(String login, String password) {
+//            mLogin = login;
+//            mPassword = password;
+//        }
+//
+//        @Override
+//        protected Boolean doInBackground(Void... params) {
+//            // TODO: attempt authentication against a network service.
+//
+//            try {
+//                String uri = ConnectionUtils.GetAuthenticationString(mLogin, mPassword);
+//                HttpClient client = new DefaultHttpClient();
+//                HttpGet httpGet = new HttpGet(uri);
+//                String html;
+//                try{
+//                    HttpResponse httpResponse = client.execute(httpGet);
+//                    HttpEntity httpEntity = httpResponse.getEntity();
+//                    html = EntityUtils.toString(httpEntity, "UTF-8");
+//                } catch(ClientProtocolException e){
+//                    e.printStackTrace();
+//                    return false;
+//                } catch(IOException e){
+//                    e.printStackTrace();
+//                    return false;
+//                }
+//                UserRole =  html;
+//
+//                uri = ConnectionUtils.GetTheoryScheduleString(mLogin, mPassword);
+//                client = new DefaultHttpClient();
+//                httpGet = new HttpGet(uri);
+//                String sched;
+//                try {
+//                    HttpResponse httpResponse = client.execute(httpGet);
+//                    HttpEntity httpEntity = httpResponse.getEntity();
+//                    sched = EntityUtils.toString(httpEntity, "UTF-8");
+//                }catch(ClientProtocolException e){
+//                    e.printStackTrace();
+//                    return false;
+//                } catch(IOException e){
+//                    e.printStackTrace();
+//                    return false;
+//                }
+//                theory_schedule = sched;
+//
+//
+//                uri = ConnectionUtils.GetPracticeScheduleString(mLogin, mPassword);
+//                client = new DefaultHttpClient();
+//                httpGet = new HttpGet(uri);
+//                try {
+//                    HttpResponse httpResponse = client.execute(httpGet);
+//                    HttpEntity httpEntity = httpResponse.getEntity();
+//                    sched = EntityUtils.toString(httpEntity, "UTF-8");
+//                }catch(ClientProtocolException e){
+//                    e.printStackTrace();
+//                    return false;
+//                } catch(IOException e){
+//                    e.printStackTrace();
+//                    return false;
+//                }
+//                practice_schedule = sched;
+//
+//
+//                return true;
+//            } catch (Throwable e) {
+//                return false;
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(final Boolean success) {
+////            mAuthTask = null;
+////            showProgress(false);
+//
+//            if (success) {
+//                final String user = UserRole != null
+//                        ? ConnectionUtils.getUserFromResponse(UserRole)
+//                        : "bad_response";
+//
+//
+//                switch (user) {
+//                    case "student":
+//                        finish();
+//                        WriteFile("logged_in_student");
+//                        WriteScheduleTheoryToFile(theory_schedule);
+//                        WriteSchedulePracticeToFile(practice_schedule);
+//                        Intent studentActivity = new Intent(ActivityStudent.this, ActivityStudent.class);
+//                        studentActivity.putExtra("login", mLogin);
+//
+//                        // Extras
+//                        studentActivity.putExtra("password", mPassword);
+//                        ActivityStudent.this.startActivity(studentActivity);
+//
+//
+//                        break;
+//                    case "teacher":
+//                        finish();
+//                        WriteFile("logged_in_instructor");
+//                        Intent instructorActivity = new Intent(ActivityStudent.this, ActivityInstructor.class);
+//                        ActivityStudent.this.startActivity(instructorActivity);
+//                        break;
+//                    default:
+//                        break;
+//                }
+//
+//            }
+//        }
+//    }
+
+
+
+
+    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mLogin;
+        private final String mPassword;
+
+        private String UserRole;
+        private String theory_schedule;
+        private String practice_schedule;
+
+        UserLoginTask(String login, String password) {
+            mLogin = login;
+            mPassword = password;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+
+            try {
+                String uri = ConnectionUtils.GetAuthenticationString(mLogin, mPassword);
+                HttpClient client = new DefaultHttpClient();
+                HttpGet httpGet = new HttpGet(uri);
+                String html;
+                try {
+                    HttpResponse httpResponse = client.execute(httpGet);
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    html = EntityUtils.toString(httpEntity, "UTF-8");
+                } catch (ClientProtocolException e) {
+                    e.printStackTrace();
+                    return false;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                UserRole = html;
+
+                uri = ConnectionUtils.GetTheoryScheduleString(mLogin, mPassword);
+                client = new DefaultHttpClient();
+                httpGet = new HttpGet(uri);
+                String sched;
+                try {
+                    HttpResponse httpResponse = client.execute(httpGet);
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    sched = EntityUtils.toString(httpEntity, "UTF-8");
+                } catch (ClientProtocolException e) {
+                    e.printStackTrace();
+                    return false;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                theory_schedule = sched;
+
+
+                uri = ConnectionUtils.GetPracticeScheduleString(mLogin, mPassword);
+                client = new DefaultHttpClient();
+                httpGet = new HttpGet(uri);
+                try {
+                    HttpResponse httpResponse = client.execute(httpGet);
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    sched = EntityUtils.toString(httpEntity, "UTF-8");
+                } catch (ClientProtocolException e) {
+                    e.printStackTrace();
+                    return false;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+                practice_schedule = sched;
+
+
+                return true;
+            } catch (Throwable e) {
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+
+            if (success) {
+                final String user = UserRole != null
+                        ? ConnectionUtils.getUserFromResponse(UserRole)
+                        : "bad_response";
+
+
+                switch (user) {
+                    case "student":
+                        finish();
+                        WriteFile("logged_in_student");
+                        WriteScheduleTheoryToFile(theory_schedule);
+                        WriteSchedulePracticeToFile(practice_schedule);
+                        Intent studentActivity = new Intent(ActivityStudent.this, ActivityStudent.class);
+                        studentActivity.putExtra("login", mLogin);
+
+                        // Extras
+                        studentActivity.putExtra("password", mPassword);
+                        ActivityStudent.this.startActivity(studentActivity);
+
+
+                        break;
+                    case "teacher":
+                        finish();
+                        WriteFile("logged_in_instructor");
+//                        WriteSchedulePracticeToFile(practice_schedule);
+                        Intent instructorActivity = new Intent(ActivityStudent.this, ActivityInstructor.class);
+                        ActivityStudent.this.startActivity(instructorActivity);
+                        break;
+                    default:
+
+                        break;
+                }
+
+            } else {
+                return;
+            }
+        }
+    }
+
 
 }
 

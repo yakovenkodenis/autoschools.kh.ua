@@ -49,9 +49,8 @@ import java.util.List;
 
 /**
  * A login screen that offers login via email/password.
-
  */
-public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
+public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -124,9 +123,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         }
     }
 
-    public void onRegister(View v)
-    {
-        if(ConnectionUtils.isOnline(getApplicationContext())) {
+    public void onRegister(View v) {
+        if (ConnectionUtils.isOnline(getApplicationContext())) {
             Intent register = new Intent(Intent.ACTION_VIEW);
             register.setData(Uri.parse(ConnectionUtils.GetRegistrationLink()));
             startActivity(register);
@@ -284,9 +282,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
         mEmailView.setAdapter(adapter);
     }
 
-    private void WriteFile(String is_logged_in)
-    {
-        try{
+    private void WriteFile(String is_logged_in) {
+        try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
                     (openFileOutput("is_logged_in", MODE_PRIVATE)));
 
@@ -294,23 +291,21 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             Log.d("WriteFile", "файлы записаны");
 
             bw.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    String ReadFile()
-    {
-        try{
+    String ReadFile() {
+        try {
             InputStream in = openFileInput("is_logged_in");
-            if(in != null)
-            {
+            if (in != null) {
                 InputStreamReader reader = new InputStreamReader(in);
                 BufferedReader bufferedReader = new BufferedReader(reader);
 
                 StringBuilder builder = new StringBuilder();
                 String str;
-                while((str = bufferedReader.readLine()) != null)
+                while ((str = bufferedReader.readLine()) != null)
                     builder.append(str);
                 in.close();
                 Log.d("ReadFile", builder.toString());
@@ -318,17 +313,17 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             }
             return "logged_out";
 
-        } catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             return "logged_out";
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return "logged_out";
         }
     }
 
-    void WriteScheduleTheoryToFile(String schedule_theory){
-        try{
+    void WriteScheduleTheoryToFile(String schedule_theory) {
+        try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
                     (openFileOutput("schedule_theory", MODE_PRIVATE)));
 
@@ -336,13 +331,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             Log.d("WriteScheduleTheoryToFile", "файлы записаны");
 
             bw.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     void WriteSchedulePracticeToFile(String schedule_practice) {
-        try{
+        try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter
                     (openFileOutput("schedule_practice", MODE_PRIVATE)));
 
@@ -350,23 +345,22 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             Log.d("WriteSchedulePracticeToFile", "файлы записаны");
 
             bw.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-    String ReadScheduleTheoryFromFile(){
-        try{
+    String ReadScheduleTheoryFromFile() {
+        try {
             InputStream in = openFileInput("schedule_theory");
-            if(in != null)
-            {
+            if (in != null) {
                 InputStreamReader reader = new InputStreamReader(in);
                 BufferedReader bufferedReader = new BufferedReader(reader);
 
                 StringBuilder builder = new StringBuilder();
                 String str;
-                while((str = bufferedReader.readLine()) != null)
+                while ((str = bufferedReader.readLine()) != null)
                     builder.append(str);
                 in.close();
                 Log.d("ReadScheduleTheoryFromFile", builder.toString());
@@ -374,29 +368,28 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             }
             return "none";
 
-        } catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             return "none";
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return "none";
-        } catch(Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
             return "none";
         }
     }
 
-    String ReadSchedulePracticeFromFile(){
-        try{
+    String ReadSchedulePracticeFromFile() {
+        try {
             InputStream in = openFileInput("schedule_practice");
-            if(in != null)
-            {
+            if (in != null) {
                 InputStreamReader reader = new InputStreamReader(in);
                 BufferedReader bufferedReader = new BufferedReader(reader);
 
                 StringBuilder builder = new StringBuilder();
                 String str;
-                while((str = bufferedReader.readLine()) != null)
+                while ((str = bufferedReader.readLine()) != null)
                     builder.append(str);
                 in.close();
                 Log.d("ReadSchedulePracticeFromFile", builder.toString());
@@ -404,13 +397,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             }
             return "none";
 
-        } catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
             return "none";
-        } catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return "none";
-        } catch(Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
             return "none";
         }
@@ -444,18 +437,18 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                 HttpClient client = new DefaultHttpClient();
                 HttpGet httpGet = new HttpGet(uri);
                 String html;
-                try{
+                try {
                     HttpResponse httpResponse = client.execute(httpGet);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     html = EntityUtils.toString(httpEntity, "UTF-8");
-                } catch(ClientProtocolException e){
+                } catch (ClientProtocolException e) {
                     e.printStackTrace();
                     return false;
-                } catch(IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     return false;
                 }
-                UserRole =  html;
+                UserRole = html;
 
                 uri = ConnectionUtils.GetTheoryScheduleString(mLogin, mPassword);
                 client = new DefaultHttpClient();
@@ -465,10 +458,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                     HttpResponse httpResponse = client.execute(httpGet);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     sched = EntityUtils.toString(httpEntity, "UTF-8");
-                }catch(ClientProtocolException e){
+                } catch (ClientProtocolException e) {
                     e.printStackTrace();
                     return false;
-                } catch(IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     return false;
                 }
@@ -482,10 +475,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                     HttpResponse httpResponse = client.execute(httpGet);
                     HttpEntity httpEntity = httpResponse.getEntity();
                     sched = EntityUtils.toString(httpEntity, "UTF-8");
-                }catch(ClientProtocolException e){
+                } catch (ClientProtocolException e) {
                     e.printStackTrace();
                     return false;
-                } catch(IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                     return false;
                 }
@@ -527,6 +520,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
                     case "teacher":
                         finish();
                         WriteFile("logged_in_instructor");
+//                        WriteSchedulePracticeToFile(practice_schedule);
                         Intent instructorActivity = new Intent(LoginActivity.this, ActivityInstructor.class);
                         LoginActivity.this.startActivity(instructorActivity);
                         break;

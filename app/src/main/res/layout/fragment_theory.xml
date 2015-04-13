@@ -20,14 +20,11 @@
         style="@style/listview_text_style"/>
 
     <TextView
-        android:text="4:20 PM"
+        android:text="@string/zero_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textClock"
-        android:timeZone="GMT+02:00"
-        android:textSize="60dp"
-        android:password="false"
-        android:phoneNumber="false"
+        android:textSize="60sp"
         android:singleLine="false"
         android:gravity="top|bottom|center_vertical|center_horizontal"
         android:layout_alignParentTop="true"

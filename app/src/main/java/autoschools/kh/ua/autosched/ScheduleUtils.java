@@ -28,6 +28,7 @@ public final class ScheduleUtils {
     }
 
     public static String[] getShortTheoryDescriptions(ArrayList<TheoryLesson> arr) {
+        Collections.sort(arr);
         String[] desc = new String[arr.size()];
         for (int i = 0; i < desc.length; ++i) {
             desc[i] = arr.get(i).toShortDescriptionString();
@@ -35,8 +36,29 @@ public final class ScheduleUtils {
         return desc;
     }
 
+//    public static Time[] getTimes(ArrayList<TheoryLesson> arr) {
+//        Time[] times = new Time[arr.size()];
+//        for (int i = 0; i < times.length; ++i) {
+//            times[i] = new Time(arr.get(i).getStartTime(), arr.get(i).getFinishTime());
+//        }
+//        return times;
+//    }
+
+    public static String[] getTheoryTimes(ArrayList<TheoryLesson> arr) {
+        Collections.sort(arr);
+        String[] times = new String[arr.size() * 2];
+        int i = 0;
+        for (TheoryLesson l : arr) {
+            times[i] = l.getDay() + " " + l.getStartTime();
+            times[++i] = l.getDay() + " " + l.getFinishTime();
+            i++;
+        }
+        return times;
+    }
+
     public static String[] getLongTheoryDescriptions(ArrayList<TheoryLesson> arr) {
         try {
+            Collections.sort(arr);
             String[] desc = new String[arr.size()];
             for (int i = 0; i < arr.size(); ++i) {
                 desc[i] = arr.get(i).toDescriptionString();
@@ -67,6 +89,19 @@ public final class ScheduleUtils {
 
 
     // ============== PRACTICE METHODS ================= //
+
+
+    public static String[] getPracticeTimes(ArrayList<PracticeLesson> arr) {
+        Collections.sort(arr);
+        String[] times = new String[arr.size() * 2];
+        int i = 0;
+        for (PracticeLesson l : arr) {
+            times[i] = l.getDay() + " " + l.getStartTime();
+            times[++i] = l.getDay() + " " + l.getFinishTime();
+            i++;
+        }
+        return times;
+    }
 
 
     public static ArrayList<PracticeLesson> GetPracticeArray(String s) {

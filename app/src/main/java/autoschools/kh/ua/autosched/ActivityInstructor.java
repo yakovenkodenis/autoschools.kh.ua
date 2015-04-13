@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +19,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -27,7 +27,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ActivityInstructor extends Activity {
     String[] myItems;
@@ -49,25 +58,17 @@ public class ActivityInstructor extends Activity {
 
             ListView lstPractice = (ListView) findViewById(R.id.listView);
 
+            TextView timer = (TextView) findViewById(R.id.textClock);
 
-            try {
-                myItems = ScheduleUtils.getPracticeTitles(arr);
-                descriptions = ScheduleUtils.getShortPracticeDescriptions(arr);
-            } catch (Throwable e) {
-
-
-                //TODO debug
-                StackTraceElement[] st = e.getStackTrace();
-                StringBuilder sb = new StringBuilder();
-                for (StackTraceElement s : st) {
-                    sb.append(s.toString()).append("\n");
-                }
-                Log.wtf("ACTIVITY INSTRUCTOR CLASS onCreateView()", sb.toString());
+            myItems = ScheduleUtils.getPracticeTitles(arr);
+            descriptions = ScheduleUtils.getShortPracticeDescriptions(arr);
 
 
-                e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Ошибка подключения ACTIVITY INSTRUCTOR CLASS", Toast.LENGTH_SHORT).show();
-            }
+//            try {
+//                new ScheduleTimer(timer, ActivityInstructor.this).main(ScheduleUtils.getPracticeTimes(arr));
+//            } catch (ParseException e) {
+//                e.printStackTrace();
+//            }
 
 
             lstPractice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -191,6 +192,20 @@ public class ActivityInstructor extends Activity {
         }
     }
 
+    private void showInfoDialog(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityInstructor.this);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -199,6 +214,10 @@ public class ActivityInstructor extends Activity {
         int id = item.getItemId();
         switch (id) {
             case R.id.site:
+                String url = "http://www.autoschools.kh.ua";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
                 return true;
             case R.id.update:
                 setRefreshActionButtonState(true);
@@ -227,9 +246,132 @@ public class ActivityInstructor extends Activity {
 
                 return true;
             }
-
+            case R.id.aboutAuthors:
+                showInfoDialog("Об авторах", getResources().getString(R.string.authors_help));
+                return true;
+            case R.id.help:
+                showInfoDialog("Помощь", getResources().getString(R.string.menu_help));
+                return true;
+            case R.id.aboutProject:
+                showInfoDialog("О проекте", getResources().getString(R.string.about_help));
+                return true;
+            case R.id.contacts:
+                showInfoDialog("Обратная связь", getResources().getString(R.string.feedback_help));
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    class ScheduleInstructorTimer {
+
+        private final SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+
+        public TextView textView;
+
+        private Timer dateTimer;
+
+        private Timer remainderTimer;
+
+        private Date formatDate = new Date();
+
+        private Date nextDate;
+
+        private boolean remainderTimerStarted;
+
+        private static final long REMINDER_UPDATE_INTERVAL = 1000;
+
+        private String[] DATES;
+
+        private int currentIndex;
+
+        public ScheduleInstructorTimer(final TextView t) {
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            textView = t;
+            dateTimer = new Timer();
+        }
+
+        public void main(String[] dates) throws ParseException {
+            checkDates(dates);
+            run();
+        }
+
+        private void checkDates(String[] dates) throws ParseException {
+            List<String> list = new ArrayList<>();
+            DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.ENGLISH);
+            for (String date : dates) {
+                long current = System.currentTimeMillis() + 1000;
+                if (format.parse(date).getTime() - current > 0) {
+                    list.add(date);
+                }
+            }
+            DATES = new String[list.size()];
+            list.toArray(DATES);
+        }
+
+        private void run() {
+            nextDate = parseDate(DATES[currentIndex]);
+            schedule();
+        }
+
+        public void schedule() {
+            runSecondsCounter();
+            dateTimer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    currentIndex++;
+                    if (currentIndex < DATES.length) {
+                        nextDate = parseDate(DATES[currentIndex]);
+                        schedule();
+                    } else {
+                        remainderTimer.cancel();
+                    }
+                }
+            }, nextDate);
+
+        }
+
+        private Date parseDate(String nextDate) {
+            Date date = null;
+            DateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm",
+                    Locale.ENGLISH);
+            try {
+                date = format.parse(nextDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return date;
+        }
+
+        private void runSecondsCounter() {
+            if (remainderTimerStarted) {
+                remainderTimer.cancel();
+            }
+
+            remainderTimer = new Timer();
+            remainderTimer.scheduleAtFixedRate(new TimerTask() {
+
+                @Override
+                public void run() {
+                    remainderTimerStarted = true;
+                    long remains = nextDate.getTime() - new Date().getTime();
+
+                    formatDate.setTime(remains);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            Date date = new Date(formatDate.getTime());
+                            String res = format.format(date);
+                            textView.setText(res);
+                        }
+                    });
+
+                }
+            }, REMINDER_UPDATE_INTERVAL, REMINDER_UPDATE_INTERVAL);
+        }
     }
 }
 

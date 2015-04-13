@@ -71,7 +71,7 @@ public class TheoryLesson implements Comparable<TheoryLesson> {
         return getTime(start_date_time);
     }
 
-    public String getFinishTime(){
+    public String getFinishTime() {
 //        String res = finish_date_time.split("-")[1];
 //        Log.wtf("THEORY LESSON CLASS getFinishTime()", res);
 //        return res;
